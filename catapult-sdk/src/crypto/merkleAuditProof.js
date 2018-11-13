@@ -30,6 +30,8 @@ class InvalidTree extends Error {}
 
 const evenify = number => (number % 2 ? number + 1 : number);
 
+const unwrap = element => (element instanceof Buffer ? element : element.buffer);
+
 /**
  * Returns the index of a transaction hash in a Merkle tree.
  * @param {Uint8Array} hash The transaction hash to look up in the tree.
@@ -38,7 +40,7 @@ const evenify = number => (number % 2 ? number + 1 : number);
  */
 const indexOfLeafWithHash = (hash, tree) => tree.nodes
 	.slice(0, evenify(tree.numberOfTransactions))
-	.findIndex(element => arrayUtils.deepEqual(element, hash));
+	.findIndex(element => arrayUtils.deepEqual(unwrap(element), hash));
 
 const siblingOf = nodeIndex => {
 	if (nodeIndex % 2) {

@@ -25,40 +25,6 @@ const {
 } = require('../../src/crypto/merkleAuditProof.js');
 const convert = require('../../src/utils/convert');
 
-const hexStringToBuffer = input => Buffer.from(convert.hexToUint8(input), 'hex');
-
-const merkleTree = {
-	numberOfTransactions: 4,
-	nodes: [
-		hexStringToBuffer('8D25B2639A7D12FEAAAEF34358B215E97533F9FFDDA5B9FADFD8ECC229695263'),
-		hexStringToBuffer('8AB2F19A47C5B30CC389AE1580F0472B4D3AFEEA83CDF0F707D03ED76B15A00C'),
-		hexStringToBuffer('B9840C4EADB6724A2DFCA81D5E90EF3F4EE91BEB63A58FA91A4F05E951F08FCF'),
-		hexStringToBuffer('B9840C4EADB6724A2DFCA81D5E90EF3F4EE91BEB63A58FA91A4F05E951F08FCF'),
-		hexStringToBuffer('586B203612B0E5CA695CFF677A5B784E4368B79C1A7B272036105753A915EDC9'),
-		hexStringToBuffer('AA1DFFF01B3ABA492188195DF4D77AF25FF9D57DF4EA0FD6FE498D572B6E67FD'),
-		hexStringToBuffer('16D28DD7AF87B86C79273450470E96F22C66F8EF4598064603699B69F10464D0')
-	]
-};
-
-const merkleTreeLong = {
-	numberOfTransactions: 6,
-	nodes: [
-		hexStringToBuffer('A983745F69959AF438C5B59501B7B6FCD4312DE1F5252A6E8B54D09E23266A7C'),
-		hexStringToBuffer('5A639C5865FFA3331C3315BE2797F490D7D9C12826AF08C3643929DCAC391E21'),
-		hexStringToBuffer('F95D66CCB9B788A582FB35ABB4328BD705E2DB97D3F2EFAED46C88584A87E202'),
-		hexStringToBuffer('C11A995692E24FE9A79B657375AA051D97B5261C14A2F08792AE5269F412BD8F'),
-		hexStringToBuffer('0CDD981B532DDB0789A3B7F96B37FA0973EE6EB1D41FA8AA8E0411BA2FB07851'),
-		hexStringToBuffer('C7F87E9FC96202ECE5F219EA87A2C02363B763520A1D7B08F0D2037FFF7CC1E0'),
-		hexStringToBuffer('5EEEF952CE75555C24C4820E7BE36370B0AD9ABFE357D4244AC1DA1E1102229A'),
-		hexStringToBuffer('EFAE07E3096428E93611072581F769F12758345BEE2779A3B20326F8A1A6C373'),
-		hexStringToBuffer('DF646700D4CDBA8DF803EE27F0E8DE59A32AD95E74803C342431F1234E9D054C'),
-		hexStringToBuffer('DF646700D4CDBA8DF803EE27F0E8DE59A32AD95E74803C342431F1234E9D054C'),
-		hexStringToBuffer('9ED4FE218563EE52D2AE18CAFD9CD12A403EAD9737EFC1B8AADD892A87699AB5'),
-		hexStringToBuffer('11E903589FAE58D8DDB460F11F33A80A9B2CF09D4B50FCC615C5440337CEBE4F'),
-		hexStringToBuffer('F1BDD998E8C54C8B71CEC7B9AAC14E3A0B93F2EC93E445542885F29DA5375787')
-	]
-};
-
 describe('evenify', () => {
 	it('should return the valid even number', () => {
 		expect(evenify(0)).to.equal(0);
@@ -70,57 +36,241 @@ describe('evenify', () => {
 	});
 });
 
-describe('indexOfLeafWithHash', () => {
-	it('should return -1 if hash not found in tree', () => {
-		expect(indexOfLeafWithHash(hexStringToBuffer('9ED4FE218563EE52D2AE18CAFD9CD12A403EAD9737EFC1B8AADD892A00000000'), merkleTree))
-			.to.equal(-1);
+const addMerkleTreeTests = (wrapNode, unwrapNode) => {
+	const hexStringToBuffer = input => Buffer.from(convert.hexToUint8(input), 'hex');
+
+	const merkleTree = {
+		numberOfTransactions: 4,
+		nodes: [
+			wrapNode(hexStringToBuffer('8D25B2639A7D12FEAAAEF34358B215E97533F9FFDDA5B9FADFD8ECC229695263')),
+			wrapNode(hexStringToBuffer('8AB2F19A47C5B30CC389AE1580F0472B4D3AFEEA83CDF0F707D03ED76B15A00C')),
+			wrapNode(hexStringToBuffer('B9840C4EADB6724A2DFCA81D5E90EF3F4EE91BEB63A58FA91A4F05E951F08FCF')),
+			wrapNode(hexStringToBuffer('B9840C4EADB6724A2DFCA81D5E90EF3F4EE91BEB63A58FA91A4F05E951F08FCF')),
+			wrapNode(hexStringToBuffer('586B203612B0E5CA695CFF677A5B784E4368B79C1A7B272036105753A915EDC9')),
+			wrapNode(hexStringToBuffer('AA1DFFF01B3ABA492188195DF4D77AF25FF9D57DF4EA0FD6FE498D572B6E67FD')),
+			wrapNode(hexStringToBuffer('16D28DD7AF87B86C79273450470E96F22C66F8EF4598064603699B69F10464D0'))
+		]
+	};
+
+	const merkleTreeLong = {
+		numberOfTransactions: 6,
+		nodes: [
+			wrapNode(hexStringToBuffer('A983745F69959AF438C5B59501B7B6FCD4312DE1F5252A6E8B54D09E23266A7C')),
+			wrapNode(hexStringToBuffer('5A639C5865FFA3331C3315BE2797F490D7D9C12826AF08C3643929DCAC391E21')),
+			wrapNode(hexStringToBuffer('F95D66CCB9B788A582FB35ABB4328BD705E2DB97D3F2EFAED46C88584A87E202')),
+			wrapNode(hexStringToBuffer('C11A995692E24FE9A79B657375AA051D97B5261C14A2F08792AE5269F412BD8F')),
+			wrapNode(hexStringToBuffer('0CDD981B532DDB0789A3B7F96B37FA0973EE6EB1D41FA8AA8E0411BA2FB07851')),
+			wrapNode(hexStringToBuffer('C7F87E9FC96202ECE5F219EA87A2C02363B763520A1D7B08F0D2037FFF7CC1E0')),
+			wrapNode(hexStringToBuffer('5EEEF952CE75555C24C4820E7BE36370B0AD9ABFE357D4244AC1DA1E1102229A')),
+			wrapNode(hexStringToBuffer('EFAE07E3096428E93611072581F769F12758345BEE2779A3B20326F8A1A6C373')),
+			wrapNode(hexStringToBuffer('DF646700D4CDBA8DF803EE27F0E8DE59A32AD95E74803C342431F1234E9D054C')),
+			wrapNode(hexStringToBuffer('DF646700D4CDBA8DF803EE27F0E8DE59A32AD95E74803C342431F1234E9D054C')),
+			wrapNode(hexStringToBuffer('9ED4FE218563EE52D2AE18CAFD9CD12A403EAD9737EFC1B8AADD892A87699AB5')),
+			wrapNode(hexStringToBuffer('11E903589FAE58D8DDB460F11F33A80A9B2CF09D4B50FCC615C5440337CEBE4F')),
+			wrapNode(hexStringToBuffer('F1BDD998E8C54C8B71CEC7B9AAC14E3A0B93F2EC93E445542885F29DA5375787'))
+		]
+	};
+
+	describe('indexOfLeafWithHash', () => {
+		it('should return -1 if hash not found in tree', () => {
+			expect(indexOfLeafWithHash(hexStringToBuffer('9ED4FE218563EE52D2AE18CAFD9CD12A403EAD9737EFC1B8AADD892A00000000'), merkleTree))
+				.to.equal(-1);
+		});
+
+		it('should return -1 if hash not found in tree leaves', () => {
+			const hash = unwrapNode(merkleTree.nodes[4]);
+			expect(indexOfLeafWithHash(hash, merkleTree)).to.equal(-1);
+		});
+
+		it('should return -1 if hash not found in an empty tree', () => {
+			expect(indexOfLeafWithHash(
+				hexStringToBuffer('9ED4FE218563EE52D2AE18CAFD9CD12A403EAD9737EFC1B8AADD892A00000000'),
+				{ nodes: [], numberOfTransactions: 0 }
+			)).to.equal(-1);
+		});
+
+		it('should return the transaction found for a single node tree', () => {
+			const hash = hexStringToBuffer('9ED4FE218563EE52D2AE18CAFD9CD12A403EAD9737EFC1B8AADD892A00000000');
+			expect(indexOfLeafWithHash(
+				hash,
+				{ nodes: [wrapNode(hash)], numberOfTransactions: 1 }
+			)).to.equal(0);
+		});
+
+		it('should return the index for a found node', () => {
+			const hash = unwrapNode(merkleTree.nodes[2]);
+			expect(indexOfLeafWithHash(hash, merkleTree)).to.equal(2);
+		});
+
+		it('should return the index for a found node in the first leaf', () => {
+			const hash = unwrapNode(merkleTree.nodes[0]);
+			expect(indexOfLeafWithHash(hash, merkleTree)).to.equal(0);
+		});
+
+		it('should return the index for a found duplicated node in the last leaf out of the number of transactions', () => {
+			// Arrange:
+			const merkleTree2 = {
+				numberOfTransactions: 3,
+				nodes: [
+					wrapNode(hexStringToBuffer('8D25B2639A7D12FEAAAEF34358B215E97533F9FFDDA5B9FADFD8ECC229695263')),
+					wrapNode(hexStringToBuffer('8AB2F19A47C5B30CC389AE1580F0472B4D3AFEEA83CDF0F707D03ED76B15A00C')),
+					wrapNode(hexStringToBuffer('B9840C4EADB6724A2DFCA81D5E90EF3F4EE91BEB63A58FA91A4F05E951F08FCF')),
+					wrapNode(hexStringToBuffer('B9840C4EADB6724A2DFCA81D5E90EF3F4EE91BEB63A58FA91A4F05E951F08FCF')),
+					wrapNode(hexStringToBuffer('586B203612B0E5CA695CFF677A5B784E4368B79C1A7B272036105753A915EDC9')),
+					wrapNode(hexStringToBuffer('AA1DFFF01B3ABA492188195DF4D77AF25FF9D57DF4EA0FD6FE498D572B6E67FD')),
+					wrapNode(hexStringToBuffer('16D28DD7AF87B86C79273450470E96F22C66F8EF4598064603699B69F10464D0'))
+				]
+			};
+
+			// Assert:
+			const hash = unwrapNode(merkleTree2.nodes[2]);
+			expect(indexOfLeafWithHash(hash, merkleTree2)).to.equal(2);
+		});
 	});
 
-	it('should return -1 if hash not found in tree leaves', () => {
-		expect(indexOfLeafWithHash(merkleTree.nodes[4], merkleTree)).to.equal(-1);
-	});
+	describe('buildAuditPath', () => {
+		it('should return an empty audit proof trail for a single node tree', () => {
+			const hash = unwrapNode(merkleTree.nodes[0]);
+			const trail = buildAuditPath(hash, { nodes: [merkleTree.nodes[0]], numberOfTransactions: 1 });
+			expect(trail.length).to.equal(0);
+		});
 
-	it('should return -1 if hash not found in an empty tree', () => {
-		expect(indexOfLeafWithHash(
-			hexStringToBuffer('9ED4FE218563EE52D2AE18CAFD9CD12A403EAD9737EFC1B8AADD892A00000000'),
-			{ nodes: [], numberOfTransactions: 0 }
-		)).to.equal(-1);
-	});
+		it('should throw if hash not in tree', () => {
+			expect(() => buildAuditPath(hexStringToBuffer('000903589FAE58D8DDB460F11F33A80A9B2CF09D4B50FCC615C5440337CEBE4F'), merkleTree))
+				.to.throw(HashNotFoundError);
+		});
 
-	it('should return the transaction found for a single node tree', () => {
-		const hash = hexStringToBuffer('9ED4FE218563EE52D2AE18CAFD9CD12A403EAD9737EFC1B8AADD892A00000000');
-		expect(indexOfLeafWithHash(
-			hash,
-			{ nodes: [hash], numberOfTransactions: 1 }
-		)).to.equal(0);
-	});
+		it('should throw if tree is empty', () => {
+			expect(() => buildAuditPath(
+				hexStringToBuffer('000903589FAE58D8DDB460F11F33A80A9B2CF09D4B50FCC615C5440337CEBE4F'),
+				{ nodes: [], numberOfTransactions: 0 }
+			)).to.throw(InvalidTree);
+		});
 
-	it('should return the index for a found node', () => {
-		expect(indexOfLeafWithHash(merkleTree.nodes[2], merkleTree)).to.equal(2);
-	});
+		it('should throw if hash in tree but not leaf', () => {
+			expect(() => buildAuditPath(
+				unwrapNode(merkleTree.nodes[4]),
+				merkleTree
+			)).to.throw(HashNotFoundError);
+			expect(() => buildAuditPath(
+				unwrapNode(merkleTree.nodes[6]),
+				merkleTree
+			)).to.throw(HashNotFoundError);
+		});
 
-	it('should return the index for a found node in the first leaf', () => {
-		expect(indexOfLeafWithHash(merkleTree.nodes[0], merkleTree)).to.equal(0);
-	});
+		it('should return correctly if number of transactions is not even', () => {
+			// Arrange:
+			const merkleTree2 = {
+				numberOfTransactions: 3,
+				nodes: [
+					wrapNode(hexStringToBuffer('8D25B2639A7D12FEAAAEF34358B215E97533F9FFDDA5B9FADFD8ECC229695263')),
+					wrapNode(hexStringToBuffer('8AB2F19A47C5B30CC389AE1580F0472B4D3AFEEA83CDF0F707D03ED76B15A00C')),
+					wrapNode(hexStringToBuffer('B9840C4EADB6724A2DFCA81D5E90EF3F4EE91BEB63A58FA91A4F05E951F08FCF')),
+					wrapNode(hexStringToBuffer('B9840C4EADB6724A2DFCA81D5E90EF3F4EE91BEB63A58FA91A4F05E951F08FCF')),
+					wrapNode(hexStringToBuffer('586B203612B0E5CA695CFF677A5B784E4368B79C1A7B272036105753A915EDC9')),
+					wrapNode(hexStringToBuffer('AA1DFFF01B3ABA492188195DF4D77AF25FF9D57DF4EA0FD6FE498D572B6E67FD')),
+					wrapNode(hexStringToBuffer('16D28DD7AF87B86C79273450470E96F22C66F8EF4598064603699B69F10464D0'))
+				]
+			};
 
-	it('should return the index for a found duplicated node in the last leaf out of the number of transactions', () => {
-		// Arrange:
-		const merkleTree2 = {
-			numberOfTransactions: 3,
-			nodes: [
-				hexStringToBuffer('8D25B2639A7D12FEAAAEF34358B215E97533F9FFDDA5B9FADFD8ECC229695263'),
-				hexStringToBuffer('8AB2F19A47C5B30CC389AE1580F0472B4D3AFEEA83CDF0F707D03ED76B15A00C'),
-				hexStringToBuffer('B9840C4EADB6724A2DFCA81D5E90EF3F4EE91BEB63A58FA91A4F05E951F08FCF'),
-				hexStringToBuffer('B9840C4EADB6724A2DFCA81D5E90EF3F4EE91BEB63A58FA91A4F05E951F08FCF'),
-				hexStringToBuffer('586B203612B0E5CA695CFF677A5B784E4368B79C1A7B272036105753A915EDC9'),
-				hexStringToBuffer('AA1DFFF01B3ABA492188195DF4D77AF25FF9D57DF4EA0FD6FE498D572B6E67FD'),
-				hexStringToBuffer('16D28DD7AF87B86C79273450470E96F22C66F8EF4598064603699B69F10464D0')
-			]
-		};
+			// Assert:
+			const trail0 = buildAuditPath(unwrapNode(merkleTree2.nodes[0]), merkleTree2);
+			expect(trail0).to.deep.equal([
+				{ hash: merkleTree2.nodes[1], position: 2 },
+				{ hash: merkleTree2.nodes[5], position: 2 }
+			]);
 
-		// Assert:
-		expect(indexOfLeafWithHash(merkleTree2.nodes[2], merkleTree2)).to.equal(2);
+			const trail1 = buildAuditPath(unwrapNode(merkleTree2.nodes[1]), merkleTree2);
+			expect(trail1).to.deep.equal([
+				{ hash: merkleTree2.nodes[0], position: 1 },
+				{ hash: merkleTree2.nodes[5], position: 2 }
+			]);
+
+			const trail2 = buildAuditPath(unwrapNode(merkleTree2.nodes[2]), merkleTree2);
+			expect(trail2).to.deep.equal([
+				{ hash: merkleTree2.nodes[3], position: 2 },
+				{ hash: merkleTree2.nodes[4], position: 1 }
+			]);
+		});
+
+		it('should return correctly if number of transactions is even', () => {
+			const trail0 = buildAuditPath(unwrapNode(merkleTree.nodes[0]), merkleTree);
+			expect(trail0).to.deep.equal([
+				{ hash: merkleTree.nodes[1], position: 2 },
+				{ hash: merkleTree.nodes[5], position: 2 }
+			]);
+
+			const trail1 = buildAuditPath(unwrapNode(merkleTree.nodes[1]), merkleTree);
+			expect(trail1).to.deep.equal([
+				{ hash: merkleTree.nodes[0], position: 1 },
+				{ hash: merkleTree.nodes[5], position: 2 }
+			]);
+
+			const trail2 = buildAuditPath(unwrapNode(merkleTree.nodes[2]), merkleTree);
+			expect(trail2).to.deep.equal([
+				{ hash: merkleTree.nodes[3], position: 2 },
+				{ hash: merkleTree.nodes[4], position: 1 }
+			]);
+
+			const trail3 = buildAuditPath(unwrapNode(merkleTree.nodes[3]), merkleTree);
+			expect(trail3).to.deep.equal([
+				{ hash: merkleTree.nodes[2], position: 2 },
+				{ hash: merkleTree.nodes[4], position: 1 }
+			]);
+		});
+
+		it('should return correctly if number of transactions is even on a four-level tree', () => {
+			const trail0 = buildAuditPath(unwrapNode(merkleTreeLong.nodes[0]), merkleTreeLong);
+			expect(trail0).to.deep.equal([
+				{ hash: merkleTreeLong.nodes[1], position: 2 },
+				{ hash: merkleTreeLong.nodes[7], position: 2 },
+				{ hash: merkleTreeLong.nodes[11], position: 2 }
+			]);
+
+			const trail1 = buildAuditPath(unwrapNode(merkleTreeLong.nodes[1]), merkleTreeLong);
+			expect(trail1).to.deep.equal([
+				{ hash: merkleTreeLong.nodes[0], position: 1 },
+				{ hash: merkleTreeLong.nodes[7], position: 2 },
+				{ hash: merkleTreeLong.nodes[11], position: 2 }
+			]);
+
+			const trail2 = buildAuditPath(unwrapNode(merkleTreeLong.nodes[2]), merkleTreeLong);
+			expect(trail2).to.deep.equal([
+				{ hash: merkleTreeLong.nodes[3], position: 2 },
+				{ hash: merkleTreeLong.nodes[6], position: 1 },
+				{ hash: merkleTreeLong.nodes[11], position: 2 }
+			]);
+
+			const trail3 = buildAuditPath(unwrapNode(merkleTreeLong.nodes[3]), merkleTreeLong);
+			expect(trail3).to.deep.equal([
+				{ hash: merkleTreeLong.nodes[2], position: 1 },
+				{ hash: merkleTreeLong.nodes[6], position: 1 },
+				{ hash: merkleTreeLong.nodes[11], position: 2 }
+			]);
+
+			const trail4 = buildAuditPath(unwrapNode(merkleTreeLong.nodes[4]), merkleTreeLong);
+			expect(trail4).to.deep.equal([
+				{ hash: merkleTreeLong.nodes[5], position: 2 },
+				{ hash: merkleTreeLong.nodes[9], position: 2 },
+				{ hash: merkleTreeLong.nodes[10], position: 1 }
+			]);
+
+			const trail5 = buildAuditPath(unwrapNode(merkleTreeLong.nodes[5]), merkleTreeLong);
+			expect(trail5).to.deep.equal([
+				{ hash: merkleTreeLong.nodes[4], position: 1 },
+				{ hash: merkleTreeLong.nodes[9], position: 2 },
+				{ hash: merkleTreeLong.nodes[10], position: 1 }
+			]);
+		});
 	});
+};
+
+describe('Buffer tests', () => {
+	addMerkleTreeTests(input => input, input => input);
+});
+
+describe('Wrapped buffer tests', () => {
+	addMerkleTreeTests(input => ({ buffer: input }), input => input.buffer);
 });
 
 describe('siblingOf', () => {
@@ -133,141 +283,6 @@ describe('siblingOf', () => {
 		expect(siblingOf(2)).to.deep.equal({ position: NodePosition.right, index: 3 });
 		expect(siblingOf(13)).to.deep.equal({ position: NodePosition.left, index: 12 });
 		expect(siblingOf(14)).to.deep.equal({ position: NodePosition.right, index: 15 });
-	});
-});
-
-describe('buildAuditPath', () => {
-	it('should return an empty audit proof trail for a single node tree', () => {
-		const trail = buildAuditPath(merkleTree.nodes[0], { nodes: [merkleTree.nodes[0]], numberOfTransactions: 1 });
-		expect(trail.length).to.equal(0);
-	});
-
-	it('should throw if hash not in tree', () => {
-		expect(() => buildAuditPath(hexStringToBuffer('000903589FAE58D8DDB460F11F33A80A9B2CF09D4B50FCC615C5440337CEBE4F'), merkleTree))
-			.to.throw(HashNotFoundError);
-	});
-
-	it('should throw if tree is empty', () => {
-		expect(() => buildAuditPath(
-			hexStringToBuffer('000903589FAE58D8DDB460F11F33A80A9B2CF09D4B50FCC615C5440337CEBE4F'),
-			{ nodes: [], numberOfTransactions: 0 }
-		)).to.throw(InvalidTree);
-	});
-
-	it('should throw if hash in tree but not leaf', () => {
-		expect(() => buildAuditPath(
-			merkleTree.nodes[4],
-			merkleTree
-		)).to.throw(HashNotFoundError);
-		expect(() => buildAuditPath(
-			merkleTree.nodes[6],
-			merkleTree
-		)).to.throw(HashNotFoundError);
-	});
-
-	it('should return correctly if number of transactions is not even', () => {
-		// Arrange:
-		const merkleTree2 = {
-			numberOfTransactions: 3,
-			nodes: [
-				hexStringToBuffer('8D25B2639A7D12FEAAAEF34358B215E97533F9FFDDA5B9FADFD8ECC229695263'),
-				hexStringToBuffer('8AB2F19A47C5B30CC389AE1580F0472B4D3AFEEA83CDF0F707D03ED76B15A00C'),
-				hexStringToBuffer('B9840C4EADB6724A2DFCA81D5E90EF3F4EE91BEB63A58FA91A4F05E951F08FCF'),
-				hexStringToBuffer('B9840C4EADB6724A2DFCA81D5E90EF3F4EE91BEB63A58FA91A4F05E951F08FCF'),
-				hexStringToBuffer('586B203612B0E5CA695CFF677A5B784E4368B79C1A7B272036105753A915EDC9'),
-				hexStringToBuffer('AA1DFFF01B3ABA492188195DF4D77AF25FF9D57DF4EA0FD6FE498D572B6E67FD'),
-				hexStringToBuffer('16D28DD7AF87B86C79273450470E96F22C66F8EF4598064603699B69F10464D0')
-			]
-		};
-
-		// Assert:
-		const trail0 = buildAuditPath(merkleTree2.nodes[0], merkleTree2);
-		expect(trail0).to.deep.equal([
-			{ hash: merkleTree2.nodes[1], position: 2 },
-			{ hash: merkleTree2.nodes[5], position: 2 }
-		]);
-
-		const trail1 = buildAuditPath(merkleTree2.nodes[1], merkleTree2);
-		expect(trail1).to.deep.equal([
-			{ hash: merkleTree2.nodes[0], position: 1 },
-			{ hash: merkleTree2.nodes[5], position: 2 }
-		]);
-
-		const trail2 = buildAuditPath(merkleTree2.nodes[2], merkleTree2);
-		expect(trail2).to.deep.equal([
-			{ hash: merkleTree2.nodes[3], position: 2 },
-			{ hash: merkleTree2.nodes[4], position: 1 }
-		]);
-	});
-
-	it('should return correctly if number of transactions is even', () => {
-		const trail0 = buildAuditPath(merkleTree.nodes[0], merkleTree);
-		expect(trail0).to.deep.equal([
-			{ hash: merkleTree.nodes[1], position: 2 },
-			{ hash: merkleTree.nodes[5], position: 2 }
-		]);
-
-		const trail1 = buildAuditPath(merkleTree.nodes[1], merkleTree);
-		expect(trail1).to.deep.equal([
-			{ hash: merkleTree.nodes[0], position: 1 },
-			{ hash: merkleTree.nodes[5], position: 2 }
-		]);
-
-		const trail2 = buildAuditPath(merkleTree.nodes[2], merkleTree);
-		expect(trail2).to.deep.equal([
-			{ hash: merkleTree.nodes[3], position: 2 },
-			{ hash: merkleTree.nodes[4], position: 1 }
-		]);
-
-		const trail3 = buildAuditPath(merkleTree.nodes[3], merkleTree);
-		expect(trail3).to.deep.equal([
-			{ hash: merkleTree.nodes[2], position: 2 },
-			{ hash: merkleTree.nodes[4], position: 1 }
-		]);
-	});
-
-	it('should return correctly if number of transactions is even on a four-level tree', () => {
-		const trail0 = buildAuditPath(merkleTreeLong.nodes[0], merkleTreeLong);
-		expect(trail0).to.deep.equal([
-			{ hash: merkleTreeLong.nodes[1], position: 2 },
-			{ hash: merkleTreeLong.nodes[7], position: 2 },
-			{ hash: merkleTreeLong.nodes[11], position: 2 }
-		]);
-
-		const trail1 = buildAuditPath(merkleTreeLong.nodes[1], merkleTreeLong);
-		expect(trail1).to.deep.equal([
-			{ hash: merkleTreeLong.nodes[0], position: 1 },
-			{ hash: merkleTreeLong.nodes[7], position: 2 },
-			{ hash: merkleTreeLong.nodes[11], position: 2 }
-		]);
-
-		const trail2 = buildAuditPath(merkleTreeLong.nodes[2], merkleTreeLong);
-		expect(trail2).to.deep.equal([
-			{ hash: merkleTreeLong.nodes[3], position: 2 },
-			{ hash: merkleTreeLong.nodes[6], position: 1 },
-			{ hash: merkleTreeLong.nodes[11], position: 2 }
-		]);
-
-		const trail3 = buildAuditPath(merkleTreeLong.nodes[3], merkleTreeLong);
-		expect(trail3).to.deep.equal([
-			{ hash: merkleTreeLong.nodes[2], position: 1 },
-			{ hash: merkleTreeLong.nodes[6], position: 1 },
-			{ hash: merkleTreeLong.nodes[11], position: 2 }
-		]);
-
-		const trail4 = buildAuditPath(merkleTreeLong.nodes[4], merkleTreeLong);
-		expect(trail4).to.deep.equal([
-			{ hash: merkleTreeLong.nodes[5], position: 2 },
-			{ hash: merkleTreeLong.nodes[9], position: 2 },
-			{ hash: merkleTreeLong.nodes[10], position: 1 }
-		]);
-
-		const trail5 = buildAuditPath(merkleTreeLong.nodes[5], merkleTreeLong);
-		expect(trail5).to.deep.equal([
-			{ hash: merkleTreeLong.nodes[4], position: 1 },
-			{ hash: merkleTreeLong.nodes[9], position: 2 },
-			{ hash: merkleTreeLong.nodes[10], position: 1 }
-		]);
 	});
 });
 
