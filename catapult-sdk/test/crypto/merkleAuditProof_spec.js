@@ -25,17 +25,7 @@ const {
 } = require('../../src/crypto/merkleAuditProof.js');
 const convert = require('../../src/utils/convert');
 
-describe('evenify', () => {
-	it('should return the valid even number', () => {
-		expect(evenify(0)).to.equal(0);
-		expect(evenify(1)).to.equal(2);
-		expect(evenify(2)).to.equal(2);
-		expect(evenify(3)).to.equal(4);
-		expect(evenify(13)).to.equal(14);
-		expect(evenify(14)).to.equal(14);
-	});
-});
-
+// wrapNode is either identity or simple wrapper, that adds layer on top of ArrayBuffer with a .buffer field (to mimic mongo Binary object)
 const addMerkleTreeTests = (wrapNode, unwrapNode) => {
 	const hexStringToBuffer = input => Buffer.from(convert.hexToUint8(input), 'hex');
 
@@ -78,8 +68,7 @@ const addMerkleTreeTests = (wrapNode, unwrapNode) => {
 		});
 
 		it('should return -1 if hash not found in tree leaves', () => {
-			const hash = unwrapNode(merkleTree.nodes[4]);
-			expect(indexOfLeafWithHash(hash, merkleTree)).to.equal(-1);
+			expect(indexOfLeafWithHash(unwrapNode(merkleTree.nodes[4]), merkleTree)).to.equal(-1);
 		});
 
 		it('should return -1 if hash not found in an empty tree', () => {
@@ -98,13 +87,11 @@ const addMerkleTreeTests = (wrapNode, unwrapNode) => {
 		});
 
 		it('should return the index for a found node', () => {
-			const hash = unwrapNode(merkleTree.nodes[2]);
-			expect(indexOfLeafWithHash(hash, merkleTree)).to.equal(2);
+			expect(indexOfLeafWithHash(unwrapNode(merkleTree.nodes[2]), merkleTree)).to.equal(2);
 		});
 
 		it('should return the index for a found node in the first leaf', () => {
-			const hash = unwrapNode(merkleTree.nodes[0]);
-			expect(indexOfLeafWithHash(hash, merkleTree)).to.equal(0);
+			expect(indexOfLeafWithHash(unwrapNode(merkleTree.nodes[0]), merkleTree)).to.equal(0);
 		});
 
 		it('should return the index for a found duplicated node in the last leaf out of the number of transactions', () => {
@@ -123,15 +110,13 @@ const addMerkleTreeTests = (wrapNode, unwrapNode) => {
 			};
 
 			// Assert:
-			const hash = unwrapNode(merkleTree2.nodes[2]);
-			expect(indexOfLeafWithHash(hash, merkleTree2)).to.equal(2);
+			expect(indexOfLeafWithHash(unwrapNode(merkleTree2.nodes[2]), merkleTree2)).to.equal(2);
 		});
 	});
 
 	describe('buildAuditPath', () => {
 		it('should return an empty audit proof trail for a single node tree', () => {
-			const hash = unwrapNode(merkleTree.nodes[0]);
-			const trail = buildAuditPath(hash, { nodes: [merkleTree.nodes[0]], numberOfTransactions: 1 });
+			const trail = buildAuditPath(unwrapNode(merkleTree.nodes[0]), { nodes: [merkleTree.nodes[0]], numberOfTransactions: 1 });
 			expect(trail.length).to.equal(0);
 		});
 
@@ -264,6 +249,17 @@ const addMerkleTreeTests = (wrapNode, unwrapNode) => {
 		});
 	});
 };
+
+describe('evenify', () => {
+	it('should return the valid even number', () => {
+		expect(evenify(0)).to.equal(0);
+		expect(evenify(1)).to.equal(2);
+		expect(evenify(2)).to.equal(2);
+		expect(evenify(3)).to.equal(4);
+		expect(evenify(13)).to.equal(14);
+		expect(evenify(14)).to.equal(14);
+	});
+});
 
 describe('Buffer tests', () => {
 	addMerkleTreeTests(input => input, input => input);
