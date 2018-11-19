@@ -23,7 +23,17 @@ const EntityType = require('../../src/model/EntityType');
 const ModelSchemaBuilder = require('../../src/model/ModelSchemaBuilder');
 const test = require('../binaryTestUtils');
 
-const { accountPropertiesPlugin, PropertyType } = require('../../src/plugins/accountProperties');
+const accountPropertiesPlugin = require('../../src/plugins/accountProperties');
+
+const propertyTypeBlockOffset = 128;
+const PropertyType = Object.freeze({
+	addressAllow: 1,
+	addressBlock: 1 + propertyTypeBlockOffset,
+	mosaicAllow: 2,
+	mosaicBlock: 2 + propertyTypeBlockOffset,
+	entityTypeAllow: 4,
+	entityTypeBlock: 4 + propertyTypeBlockOffset
+});
 
 describe('account properties plugin', () => {
 	describe('property types enumeration', () => {
