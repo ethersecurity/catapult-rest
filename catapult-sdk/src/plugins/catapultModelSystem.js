@@ -23,6 +23,7 @@ const accountLink = require('./accountLink');
 const accountProperties = require('./accountProperties');
 const aggregate = require('./aggregate');
 const lock = require('./lock');
+const mosaic = require('./mosaic');
 const multisig = require('./multisig');
 const namespace = require('./namespace');
 const transfer = require('./transfer');
@@ -31,7 +32,7 @@ const ModelSchemaBuilder = require('../model/ModelSchemaBuilder');
 const ModelCodecBuilder = require('../modelBinary/ModelCodecBuilder');
 
 const plugins = {
-	accountLink, accountProperties, aggregate, lock, multisig, namespace, transfer
+	accountLink, accountProperties, aggregate, lock, mosaic, multisig, namespace, transfer
 };
 
 /**

@@ -22,12 +22,13 @@ const accountProperties = require('./accountProperties.js');
 const aggregate = require('./aggregate');
 const empty = require('./empty');
 const lock = require('./lock');
+const mosaic = require('./mosaic');
 const multisig = require('./multisig');
 const namespace = require('./namespace');
 const MessageChannelBuilder = require('../connection/MessageChannelBuilder');
 
 const plugins = {
-	accountProperties, aggregate, lock, multisig, namespace, transfer: empty
+	accountProperties, aggregate, lock, mosaic, multisig, namespace, transfer: empty
 };
 
 module.exports = {

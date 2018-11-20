@@ -18,22 +18,22 @@
  * along with Catapult.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/** @module plugins/namespace */
-const namespaceRoutes = require('./routes/namespaceRoutes');
-const NamespaceDb = require('./db/NamespaceDb');
+/** @module plugins/mosaic */
+const mosaicRoutes = require('./routes/mosaicRoutes');
+const MosaicDb = require('./db/MosaicDb');
 
 /**
- * Creates a namespace plugin.
+ * Creates a mosaic plugin.
  * @type {module:plugins/CatapultRestPlugin}
  */
 module.exports = {
-	createDb: db => new NamespaceDb(db),
+	createDb: db => new MosaicDb(db),
 
 	registerTransactionStates: () => {},
 
 	registerMessageChannels: () => {},
 
 	registerRoutes: (...args) => {
-		namespaceRoutes.register(...args);
+		mosaicRoutes.register(...args);
 	}
 };

@@ -37,7 +37,15 @@ describe('route system', () => {
 		const supportedPluginNames = routeSystem.supportedPluginNames();
 
 		// Assert:
-		expect(supportedPluginNames).to.deep.equal(['accountProperties', 'aggregate', 'lock', 'multisig', 'namespace', 'transfer']);
+		expect(supportedPluginNames).to.deep.equal([
+			'accountProperties',
+			'aggregate',
+			'lock',
+			'mosaic',
+			'multisig',
+			'namespace',
+			'transfer'
+		]);
 	});
 
 	describe('routes', () => {

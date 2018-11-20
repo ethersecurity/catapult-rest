@@ -19,7 +19,7 @@
  */
 
 const MongoDb = require('mongodb');
-const NamespaceDb = require('../../../../src/plugins/db/NamespaceDb');
+const MosaicDb = require('../../../../src/plugins/db/MosaicDb');
 const test = require('../../../testUtils');
 const dbTestUtils = require('../../../db/utils/dbTestUtils');
 
@@ -62,7 +62,7 @@ const mosaicDbTestUtils = {
 		createMosaic,
 		createMosaics,
 		runDbTest: (dbEntities, issueDbCommand, assertDbCommandResult) =>
-			dbTestUtils.db.runDbTest(dbEntities, 'mosaics', db => new NamespaceDb(db), issueDbCommand, assertDbCommandResult)
+			dbTestUtils.db.runDbTest(dbEntities, 'mosaics', db => new MosaicDb(db), issueDbCommand, assertDbCommandResult)
 	}
 };
 Object.assign(mosaicDbTestUtils, test);
