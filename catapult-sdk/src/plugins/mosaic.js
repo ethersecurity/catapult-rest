@@ -27,7 +27,7 @@ const uint64 = require('../utils/uint64');
  * Creates a mosaic plugin.
  * @type {module:plugins/CatapultPlugin}
  */
-const namespacePlugin = {
+const mosaicPlugin = {
 	registerSchema: builder => {
 		builder.addTransactionSupport(EntityType.mosaicDefinition, {
 			mosaicId: ModelType.uint64,
@@ -48,19 +48,12 @@ const namespacePlugin = {
 			mosaic: { type: ModelType.object, schemaName: 'mosaicDescriptor.mosaic' }
 		});
 		builder.addSchema('mosaicDescriptor.mosaic', {
-			namespaceId: ModelType.uint64,
 			mosaicId: ModelType.uint64,
 			supply: ModelType.uint64,
 
 			height: ModelType.uint64,
 			owner: ModelType.binary,
 			properties: { type: ModelType.array, schemaName: ModelType.uint64 }
-		});
-
-		builder.addSchema('mosaicNameTuple', {
-			mosaicId: ModelType.uint64,
-			name: ModelType.string,
-			parentId: ModelType.uint64
 		});
 	},
 
@@ -140,4 +133,4 @@ const namespacePlugin = {
 	}
 };
 
-module.exports = namespacePlugin;
+module.exports = mosaicPlugin;

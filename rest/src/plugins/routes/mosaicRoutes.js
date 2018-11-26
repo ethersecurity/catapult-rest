@@ -42,13 +42,5 @@ module.exports = {
 			return db.mosaicsByNamespaceId(namespaceId, pagingOptions.id, pagingOptions.pageSize)
 				.then(mosaicSender.sendArray('namespaceId', res, next));
 		});
-
-		server.post('/mosaic/names', (req, res, next) => {
-			const mosaicIds = routeUtils.parseArgumentAsArray(req.params, 'mosaicIds', uint64.fromHex);
-			const type = catapult.model.EntityType.mosaicDefinition;
-			return db.catapultDb
-				.findNamesByIds(mosaicIds, type, { id: 'mosaicId', name: 'name', parentId: 'parentId' })
-				.then(routeUtils.createSender('mosaicNameTuple').sendArray('mosaicIds', res, next));
-		});
 	}
 };
