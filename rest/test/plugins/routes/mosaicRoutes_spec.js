@@ -18,12 +18,8 @@
  * along with Catapult.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { expect } = require('chai');
-const catapult = require('catapult-sdk');
 const mosaicRoutes = require('../../../src/plugins/routes/mosaicRoutes');
 const test = require('../../routes/utils/routeTestUtils');
-
-const { uint64 } = catapult.utils;
 
 describe('mosaic routes', () => {
 	describe('by id', () => {
@@ -44,27 +40,5 @@ describe('mosaic routes', () => {
 			dbApiName: 'mosaicsByIds',
 			type: 'mosaicDescriptor'
 		});
-	});
-
-	describe('get by namespace', () => {
-		const Valid_Namespace_Id = '1234567890ABCDEF';
-		const pagingTestsFactory = test.setup.createPagingTestsFactory(
-			{
-				routes: mosaicRoutes,
-				routeName: '/namespace/:namespaceId/mosaics',
-				createDb: (queriedIdentifiers, entities) => ({
-					mosaicsByNamespaceId: (namespaceId, pageId, pageSize) => {
-						queriedIdentifiers.push({ namespaceId, pageId, pageSize });
-						return Promise.resolve(entities);
-					}
-				})
-			},
-			{ namespaceId: Valid_Namespace_Id },
-			{ namespaceId: uint64.fromHex(Valid_Namespace_Id) },
-			'mosaicDescriptor'
-		);
-
-		pagingTestsFactory.addDefault();
-		pagingTestsFactory.addNonPagingParamFailureTest('namespaceId', '12345');
 	});
 });

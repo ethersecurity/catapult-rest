@@ -34,13 +34,5 @@ module.exports = {
 			params => db.mosaicsByIds(params),
 			uint64.fromHex
 		);
-
-		server.get('/namespace/:namespaceId/mosaics', (req, res, next) => {
-			const namespaceId = routeUtils.parseArgument(req.params, 'namespaceId', uint64.fromHex);
-			const pagingOptions = routeUtils.parsePagingArguments(req.params);
-
-			return db.mosaicsByNamespaceId(namespaceId, pagingOptions.id, pagingOptions.pageSize)
-				.then(mosaicSender.sendArray('namespaceId', res, next));
-		});
 	}
 };
